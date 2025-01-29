@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -30,6 +31,8 @@ func Run() {
 		DBname:   os.Getenv("DBNAME"),
 		SSLMode:  os.Getenv("SSLMODE"),
 	})
+	fmt.Println(os.Getenv("HOST"))
+
 	if err != nil {
 		logger.Error().Err(err).Msg("")
 		logger.Fatal().Msg("There was an error with database")
@@ -41,7 +44,7 @@ func Run() {
 	srv := new(Server)
 
 	go func() {
-		if err := srv.RunServer(os.Getenv("PORT"), handler.InitRoutes()); err != nil {
+		if err := srv.RunServer(os.Getenv("SERVERPORT"), handler.InitRoutes()); err != nil {
 			errorLog.Fatal(err)
 		}
 	}()

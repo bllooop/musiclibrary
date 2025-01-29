@@ -1,20 +1,22 @@
 package usecase
 
 import (
-	models "github.com/bllooop/musiclibrary/internal/domain"
+	"github.com/bllooop/musiclibrary/internal/domain"
 	"github.com/bllooop/musiclibrary/internal/repository"
 )
 
-type GetSongs interface {
-	GetSongsLibrary(order, sortby string, page int) ([]models.Song, error)
+type SongsLibrary interface {
+	GetSongsLibrary(order, sortby string, page int) (map[string]interface{}, error)
+	DeleteSong(songid int) error
+	Update(songid int, input domain.UpdateSong) error
 }
 
 type Usecase struct {
-	GetSongs
+	SongsLibrary
 }
 
 func NewService(repository *repository.Repository) *Usecase {
 	return &Usecase{
-		GetSongs: NewMusicService(repository),
+		SongsLibrary: NewMusicService(repository),
 	}
 }

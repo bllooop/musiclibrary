@@ -1,20 +1,22 @@
 package repository
 
 import (
-	models "github.com/bllooop/musiclibrary/internal/domain"
+	"github.com/bllooop/musiclibrary/internal/domain"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type Repository struct {
-	GetSongs
+	SongsLibrary
 }
 
-type GetSongs interface {
-	GetSongsLibrary(order, sort string, page int) ([]models.Song, error)
+type SongsLibrary interface {
+	GetSongsLibrary(order, sort string, page int) (map[string]interface{}, error)
+	DeleteSong(songid int) error
+	Update(songid int, input domain.UpdateSong) error
 }
 
 func NewRepository(pg *pgxpool.Pool) *Repository {
 	return &Repository{
-		GetSongs: NewMusicPostgres(pg),
+		SongsLibrary: NewMusicPostgres(pg),
 	}
 }
