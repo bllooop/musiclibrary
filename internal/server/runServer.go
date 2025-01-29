@@ -3,7 +3,7 @@ package server
 import (
 	"context"
 	"fmt"
-	"log"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -18,7 +18,7 @@ import (
 
 func Run() {
 	logger := zerolog.New(os.Stdout).Level(zerolog.TraceLevel)
-	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
+	//errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 	if err := godotenv.Load(); err != nil {
 		logger.Error().Err(err).Msg("")
 		logger.Fatal().Msg("There was an error with env")
@@ -44,8 +44,11 @@ func Run() {
 	srv := new(Server)
 
 	go func() {
-		if err := srv.RunServer(os.Getenv("SERVERPORT"), handler.InitRoutes()); err != nil {
-			errorLog.Fatal(err)
+		if err := srv.RunServer(os.Getenv("SERVERPORT"), handler.InitRoutes()); err != nil && err == http.ErrServerClosed {
+			logger.Info().Msg("Server was shut down gracefully")
+		} else {
+			logger.Error().Err(err).Msg("")
+			logger.Fatal().Msg("There was an error when starting the server")
 		}
 	}()
 
