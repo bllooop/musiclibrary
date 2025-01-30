@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/bllooop/musiclibrary/internal/domain"
 	"github.com/gin-gonic/gin"
@@ -17,14 +18,20 @@ type getSongsResponse struct {
 
 func (h *Handler) getSongs(c *gin.Context) {
 	sort := c.DefaultQuery("sort", "artist")
-	order := c.DefaultQuery("order", "asc")
+	order := strings.ToUpper(c.DefaultQuery("order", "asc"))
+	name := c.Query("name")
+	group := c.Query("artist")
+	text := c.Query("text")
+	releasedate := c.Query("releasedate")
+	link := c.Query("link")
+
 	page := c.DefaultQuery("page", "1")
 	pageInt, err := strconv.Atoi(page)
 	if err != nil {
 		newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
-	lists, err := h.usecases.GetSongsLibrary(order, sort, pageInt)
+	lists, err := h.usecases.GetSongsLibrary(order, sort, pageInt, name, group, text, releasedate, link)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
@@ -72,7 +79,13 @@ func (h *Handler) createSong(c *gin.Context) {
 		newErrorResponse(c, http.StatusInternalServerError, "error unmarshaling JSON")
 		return
 	}
-
+	id, err := h.usecases.CreateSong(input, song)
+	if err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+	}
+	c.JSON(http.StatusOK, map[string]interface{}{
+		"id": id,
+	})
 }
 func (h *Handler) getSongById(c *gin.Context) {
 }

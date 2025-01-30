@@ -1,3 +1,5 @@
+-- +goose Up
+-- +goose StatementBegin
 CREATE TABLE userlist
 (
     id serial not null unique,
@@ -14,3 +16,11 @@ CREATE TABLE songlist
     text varchar(1000) not null,
     link varchar(100) not null
 );
+-- +goose StatementEnd
+
+-- +goose Down
+-- +goose StatementBegin
+DROP TABLE userlist;
+
+DROP TABLE songlist;
+-- +goose StatementEnd

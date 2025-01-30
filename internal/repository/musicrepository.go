@@ -26,25 +26,65 @@ func NewMusicPostgres(pg *pgxpool.Pool) *MusicPostgres {
 	}
 }
 
-func (r *MusicPostgres) GetSongsLibrary(order, sort string, page int) (map[string]interface{}, error) {
+func (r *MusicPostgres) CreateSong(song domain.UpdateSong, songDetail domain.UpdateSong) (int, error) {
+	tr, err := r.pg.Begin(context.Background())
+	if err != nil {
+		return 0, err
+	}
+	var id int
+	createListQuery := fmt.Sprintf("INSERT INTO %s (name, artist, releasedate, text, link) VALUES ($1,$2,$3,$4,$5) RETURNING *", songsListTable)
+	row := tr.QueryRow(context.Background(), createListQuery, song.Name, song.Group, songDetail.ReleaseDate, songDetail.Text, songDetail.Link)
+	if err := row.Scan(&id); err != nil {
+		tr.Rollback(context.Background())
+		return 0, err
+	}
+	return id, tr.Commit(context.Background())
+}
+func (r *MusicPostgres) GetSongsLibrary(order, sort string, page int, name, group, text, releasedate, link string) (map[string]interface{}, error) {
 	data := map[string]interface{}{}
 	limit := 10
-
 	offset := limit * (page - 1)
 	data["Page"] = r.pagination("users", limit, page)
-	var songs []domain.Song
+	var filters []string
+	var args []interface{}
 	query := ""
-	query = fmt.Sprintf(`SELECT name, artist, releasedate, releasedate, link, text
-		FROM %s ORDER BY %s %s limit %d offset %d`, songsListTable, sort, order, limit, offset)
-	row, err := r.pg.Query(context.Background(), query)
+	query = fmt.Sprintf(`SELECT name, artist, releasedate, link, text FROM %s`, songsListTable)
+
+	if name != "" {
+		filters = append(filters, fmt.Sprintf("name ILIKE $%d", len(args)+1))
+		args = append(args, "%"+name+"%")
+	}
+	if group != "" {
+		filters = append(filters, fmt.Sprintf("artist ILIKE $%d", len(args)+1))
+		args = append(args, "%"+group+"%")
+	}
+	if text != "" {
+		filters = append(filters, fmt.Sprintf("text = $%d", len(args)+1))
+		args = append(args, text)
+	}
+	if releasedate != "" {
+		filters = append(filters, fmt.Sprintf("releasedate = $%d", len(args)+1))
+		args = append(args, releasedate)
+	}
+	if link != "" {
+		filters = append(filters, fmt.Sprintf("link = $%d", len(args)+1))
+		args = append(args, link)
+	}
+
+	if len(filters) > 0 {
+		query += " WHERE " + strings.Join(filters, " AND ")
+	}
+	query += fmt.Sprintf(` ORDER BY %s %s limit %d offset %d`, sort, order, limit, offset)
+
+	var songs []domain.Song
+	row, err := r.pg.Query(context.Background(), query, args...)
 	if err != nil {
 		return nil, err
 	}
 	defer row.Close()
 	for row.Next() {
-		var err error
 		k := domain.Song{}
-		err = row.Scan(&k.Id, &k.Name, &k.Group, &k.ReleaseDate, &k.Link, &k.Text)
+		err := row.Scan(&k.Id, &k.Name, &k.Group, &k.ReleaseDate, &k.Link, &k.Text)
 		if err != nil {
 			return nil, err
 		}
@@ -62,7 +102,7 @@ func (r *MusicPostgres) Update(songid int, input domain.UpdateSong) error {
 	argId := 1
 	if input.Name != nil {
 		setValues = append(setValues, fmt.Sprintf("name=$%d", argId))
-		args = append(args, *&input.Name)
+		args = append(args, *input.Name)
 		argId++
 	}
 	if input.Group != nil {

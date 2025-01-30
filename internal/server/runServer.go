@@ -2,7 +2,6 @@ package server
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
@@ -31,8 +30,18 @@ func Run() {
 		DBname:   os.Getenv("DBNAME"),
 		SSLMode:  os.Getenv("SSLMODE"),
 	})
-	fmt.Println(os.Getenv("HOST"))
-
+	migratePath := "./migrations"
+	if err := repository.RunMigrate(repository.Config{
+		Host:     os.Getenv("HOST"),
+		Port:     os.Getenv("PORT"),
+		Username: os.Getenv("USERNAME"),
+		Password: os.Getenv("DB_PASSWORD"),
+		DBname:   os.Getenv("DBNAME"),
+		SSLMode:  os.Getenv("SSLMODE"),
+	}, migratePath); err != nil {
+		logger.Error().Err(err).Msg("")
+		logger.Fatal().Msg("There was an error when migrating")
+	}
 	if err != nil {
 		logger.Error().Err(err).Msg("")
 		logger.Fatal().Msg("There was an error with database")
