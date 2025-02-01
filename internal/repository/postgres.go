@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	logger "github.com/bllooop/musiclibrary/pkg"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -22,6 +23,7 @@ const (
 )
 
 func NewPostgresDB(cfg Config) (*pgxpool.Pool, error) {
+	logger.Log.Info().Msg("Connecting to the database")
 	db, err := pgxpool.New(context.Background(), fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=%s", cfg.Username, cfg.Password, cfg.Host, cfg.Port, cfg.DBname, cfg.SSLMode))
 	if err != nil {
 		return nil, err

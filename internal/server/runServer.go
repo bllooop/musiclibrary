@@ -11,17 +11,19 @@ import (
 	handlers "github.com/bllooop/musiclibrary/internal/delivery/api"
 	"github.com/bllooop/musiclibrary/internal/repository"
 	"github.com/bllooop/musiclibrary/internal/usecase"
+	logger "github.com/bllooop/musiclibrary/pkg"
 	"github.com/joho/godotenv"
-	"github.com/rs/zerolog"
 )
 
 func Run() {
-	logger := zerolog.New(os.Stdout).Level(zerolog.TraceLevel)
 	//errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
+	logger.Log.Debug().Msg("Initializing server...")
+
 	if err := godotenv.Load(); err != nil {
-		logger.Error().Err(err).Msg("")
-		logger.Fatal().Msg("There was an error with env")
+		logger.Log.Error().Err(err).Msg("")
+		logger.Log.Fatal().Msg("There was an error with env")
 	}
+	logger.Log.Debug().Msg("Environment variables loaded successfully")
 	dbpool, err := repository.NewPostgresDB(repository.Config{
 		Host:     os.Getenv("HOST"),
 		Port:     os.Getenv("PORT"),
@@ -30,7 +32,14 @@ func Run() {
 		DBname:   os.Getenv("DBNAME"),
 		SSLMode:  os.Getenv("SSLMODE"),
 	})
+	if err != nil {
+		logger.Log.Error().Err(err).Msg("Database connection failed")
+		logger.Log.Fatal().Msg("There was an error with database")
+	}
+	logger.Log.Debug().Msg("Database connected successfully")
+
 	migratePath := "./migrations"
+	logger.Log.Debug().Msgf("Running database migrations from path: %s", migratePath)
 	if err := repository.RunMigrate(repository.Config{
 		Host:     os.Getenv("HOST"),
 		Port:     os.Getenv("PORT"),
@@ -39,38 +48,42 @@ func Run() {
 		DBname:   os.Getenv("DBNAME"),
 		SSLMode:  os.Getenv("SSLMODE"),
 	}, migratePath); err != nil {
-		logger.Error().Err(err).Msg("")
-		logger.Fatal().Msg("There was an error when migrating")
+		logger.Log.Error().Err(err).Msg("")
+		logger.Log.Fatal().Msg("There was an error when migrating")
 	}
 	if err != nil {
-		logger.Error().Err(err).Msg("")
-		logger.Fatal().Msg("There was an error with database")
+		logger.Log.Error().Err(err).Msg("")
+		logger.Log.Fatal().Msg("There was an error with database")
 	}
-
+	logger.Log.Debug().Msg("Initializing repository layer")
 	repos := repository.NewRepository(dbpool)
+	logger.Log.Debug().Msg("Initializing service layer")
 	usecases := usecase.NewService(repos)
+	logger.Log.Debug().Msg("Initializing API handlers")
 	handler := handlers.NewHandler(usecases)
 	srv := new(Server)
 
 	go func() {
+		logger.Log.Info().Msg("Starting server...")
 		if err := srv.RunServer(os.Getenv("SERVERPORT"), handler.InitRoutes()); err != nil && err == http.ErrServerClosed {
-			logger.Info().Msg("Server was shut down gracefully")
+			logger.Log.Info().Msg("Server was shut down gracefully")
 		} else {
-			logger.Error().Err(err).Msg("")
-			logger.Fatal().Msg("There was an error when starting the server")
+			logger.Log.Error().Err(err).Msg("")
+			logger.Log.Fatal().Msg("There was an error when starting the server")
 		}
 	}()
-
-	logger.Info().Msg("Server is running")
+	logger.Log.Info().Msg("Server is running")
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
+	logger.Log.Debug().Msg("Listening for OS termination signals")
 	<-quit
-	logger.Info().Msg("Server is shutting down")
+	logger.Log.Info().Msg("Server is shutting down")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	defer dbpool.Close()
+	logger.Log.Debug().Msg("Closing database connection")
 	if err := srv.Shutdown(ctx); err != nil {
-		logger.Error().Err(err).Msg("")
-		logger.Fatal().Msg("There was an error while shutting down the server")
+		logger.Log.Error().Err(err).Msg("")
+		logger.Log.Fatal().Msg("There was an error while shutting down the server")
 	}
 }

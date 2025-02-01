@@ -3,8 +3,8 @@ package repository
 import (
 	"database/sql"
 	"fmt"
-	"log"
 
+	logger "github.com/bllooop/musiclibrary/pkg"
 	_ "github.com/lib/pq"
 	"github.com/pressly/goose"
 )
@@ -18,7 +18,7 @@ func RunMigrate(cfg Config, migratePath string) error {
 		return err
 	}
 	defer db.Close()
-
+	logger.Log.Info().Msg("Applying migrations")
 	err = goose.SetDialect("postgres")
 	if err != nil {
 		return err
@@ -27,7 +27,6 @@ func RunMigrate(cfg Config, migratePath string) error {
 	if err != nil {
 		return err
 	}
-
-	log.Println("Migrations applied successfully!")
+	logger.Log.Info().Msg("Migrations applied successfully!")
 	return nil
 }
