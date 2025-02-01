@@ -11,7 +11,7 @@ import (
 	handlers "github.com/bllooop/musiclibrary/internal/delivery/api"
 	"github.com/bllooop/musiclibrary/internal/repository"
 	"github.com/bllooop/musiclibrary/internal/usecase"
-	logger "github.com/bllooop/musiclibrary/pkg"
+	logger "github.com/bllooop/musiclibrary/pkg/logging"
 	"github.com/joho/godotenv"
 )
 

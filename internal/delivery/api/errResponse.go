@@ -1,7 +1,7 @@
 package api
 
 import (
-	logger "github.com/bllooop/musiclibrary/pkg"
+	logger "github.com/bllooop/musiclibrary/pkg/logging"
 	"github.com/gin-gonic/gin"
 )
 

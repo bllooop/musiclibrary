@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/bllooop/musiclibrary/internal/domain"
-	logger "github.com/bllooop/musiclibrary/pkg"
+	logger "github.com/bllooop/musiclibrary/pkg/logging"
 	"github.com/gin-gonic/gin"
 )
 

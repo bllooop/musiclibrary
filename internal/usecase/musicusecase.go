@@ -5,7 +5,7 @@ import (
 
 	"github.com/bllooop/musiclibrary/internal/domain"
 	"github.com/bllooop/musiclibrary/internal/repository"
-	logger "github.com/bllooop/musiclibrary/pkg"
+	logger "github.com/bllooop/musiclibrary/pkg/logging"
 )
 
 type MusicUsecase struct {

@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	logger "github.com/bllooop/musiclibrary/pkg"
+	logger "github.com/bllooop/musiclibrary/pkg/logging"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 

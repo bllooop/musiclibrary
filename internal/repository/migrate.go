@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 
-	logger "github.com/bllooop/musiclibrary/pkg"
+	logger "github.com/bllooop/musiclibrary/pkg/logging"
 	_ "github.com/lib/pq"
 	"github.com/pressly/goose"
 )
