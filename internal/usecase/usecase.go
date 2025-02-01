@@ -10,6 +10,7 @@ type SongsLibrary interface {
 	DeleteSong(songid int) error
 	Update(songid int, input domain.UpdateSong) error
 	CreateSong(song domain.UpdateSong, songDetail domain.UpdateSong) (int, error)
+	GetSongsById(songName string, limit, offset int) ([]domain.Song, error)
 }
 
 type Usecase struct {

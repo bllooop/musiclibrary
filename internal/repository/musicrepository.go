@@ -25,6 +25,41 @@ func NewMusicPostgres(pg *pgxpool.Pool) *MusicPostgres {
 		pg: pg,
 	}
 }
+func (r *MusicPostgres) GetSongsById(songName string, limit, offset int) ([]domain.Song, error) {
+	var song []domain.Song
+
+	query := fmt.Sprintf(`WITH split_text AS (
+    SELECT 
+        verse, 
+        row_number() OVER (ORDER BY generate_series(1,1)) AS verse_number
+    FROM (
+        SELECT unnest(string_to_array(text, '\n\n')) AS verse
+        FROM %s
+        WHERE name = '%s'
+    ) AS unnested_lines
+)
+SELECT verse_number, verse
+FROM split_text
+WHERE verse_number BETWEEN $1 AND $2
+ORDER BY verse_number;`, songsListTable, songName)
+	row, err := r.pg.Query(context.Background(), query, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+	defer row.Close()
+	for row.Next() {
+		k := domain.Song{}
+		err := row.Scan(&k.Id, &k.Name, &k.Group, &k.ReleaseDate, &k.Link, &k.Text)
+		if err != nil {
+			return nil, err
+		}
+		song = append(song, k)
+	}
+	if err = row.Err(); err != nil {
+		return nil, err
+	}
+	return song, nil
+}
 
 func (r *MusicPostgres) CreateSong(song domain.UpdateSong, songDetail domain.UpdateSong) (int, error) {
 	tr, err := r.pg.Begin(context.Background())
@@ -32,6 +67,7 @@ func (r *MusicPostgres) CreateSong(song domain.UpdateSong, songDetail domain.Upd
 		return 0, err
 	}
 	var id int
+	*songDetail.Text = strings.ReplaceAll(*songDetail.Text, "\n\n", " \n\n ")
 	createListQuery := fmt.Sprintf("INSERT INTO %s (name, artist, releasedate, text, link) VALUES ($1,$2,$3,$4,$5) RETURNING *", songsListTable)
 	row := tr.QueryRow(context.Background(), createListQuery, song.Name, song.Group, songDetail.ReleaseDate, songDetail.Text, songDetail.Link)
 	if err := row.Scan(&id); err != nil {

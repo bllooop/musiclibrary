@@ -16,6 +16,36 @@ type getSongsResponse struct {
 	Data map[string]interface{} `json:"data"`
 }
 
+func (h *Handler) getSongById(c *gin.Context) {
+
+	songName := c.Param("name")
+	if songName == "" {
+		newErrorResponse(c, http.StatusBadRequest, "name can't be empty")
+	}
+
+	limit, err := strconv.Atoi(c.DefaultQuery("limit", "1"))
+	if err != nil {
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	offset, err := strconv.Atoi(c.DefaultQuery("offset", "0"))
+	if err != nil {
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	list, err := h.usecases.GetSongsById(songName, limit, offset)
+
+	if err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"song_name": songName,
+		"verse":     list,
+	})
+
+}
 func (h *Handler) getSongs(c *gin.Context) {
 	sort := c.DefaultQuery("sort", "artist")
 	order := strings.ToUpper(c.DefaultQuery("order", "asc"))
@@ -87,8 +117,7 @@ func (h *Handler) createSong(c *gin.Context) {
 		"id": id,
 	})
 }
-func (h *Handler) getSongById(c *gin.Context) {
-}
+
 func (h *Handler) deleteSong(c *gin.Context) {
 	songid, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -124,5 +153,7 @@ func (h *Handler) updateSong(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, statusResponse{"ok"})
+	c.JSON(http.StatusOK, statusResponse{
+		Status: "ok",
+	})
 }

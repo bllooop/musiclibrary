@@ -43,6 +43,10 @@ func (s *MusicUsecase) CreateSong(song domain.UpdateSong, songDetail domain.Upda
 	return s.repo.CreateSong(song, songDetail)
 }
 
+func (s *MusicUsecase) GetSongsById(songName string, limit, offset int) ([]domain.Song, error) {
+	return s.repo.GetSongsById(songName, limit, offset)
+}
+
 func contains(slice []string, item string) bool {
 	for _, s := range slice {
 		if s == item {
