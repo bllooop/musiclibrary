@@ -26,9 +26,8 @@ func NewMusicPostgres(pg *pgxpool.Pool) *MusicPostgres {
 		pg: pg,
 	}
 }
-func (r *MusicPostgres) GetSongsById(songName string, begin, end int) ([]domain.Song, error) {
-	var song []domain.Song
-
+func (r *MusicPostgres) GetSongsById(songName string, begin, end int) ([]domain.Verses, error) {
+	var verses []domain.Verses
 	query := fmt.Sprintf(`WITH split_text AS (
     SELECT 
         verse, 
@@ -36,58 +35,49 @@ func (r *MusicPostgres) GetSongsById(songName string, begin, end int) ([]domain.
     FROM (
         SELECT unnest(string_to_array(text, '\n\n')) AS verse
         FROM %s
-        WHERE name = '%s'
+        WHERE name ILIKE $1
     ) AS unnested_lines
 )
 SELECT verse_number, verse
 FROM split_text
-WHERE verse_number BETWEEN $1 AND $2
-ORDER BY verse_number;`, songsListTable, songName)
+WHERE verse_number BETWEEN $2 AND $3
+ORDER BY verse_number;`, songsListTable)
 	logger.Log.Debug().Str("query", query).Str("song_name", songName).
 		Int("begin", begin).Int("end", end).Msg("Fetching song verses")
 	logger.Log.Info().Msg("Executing query for get songs")
-	row, err := r.pg.Query(context.Background(), query, begin, end)
+	rows, err := r.pg.Query(context.Background(), query, "%"+songName+"%", begin, end)
 	if err != nil {
-		logger.Log.Error().Err(err).Msg("Failed to execute GetSongsById query")
 		return nil, err
 	}
-	defer row.Close()
-	for row.Next() {
-		k := domain.Song{}
-		err := row.Scan(&k.Id, &k.Name, &k.Group, &k.ReleaseDate, &k.Link, &k.Text)
-		if err != nil {
-			logger.Log.Error().Err(err).Msg("Error scanning row in GetSongsById")
+	defer rows.Close()
+	for rows.Next() {
+		var k domain.Verses
+		if err := rows.Scan(&k.Number, &k.Verse); err != nil {
+			logger.Log.Error().Err(err).Msg("Error scanning row")
 			return nil, err
 		}
-		song = append(song, k)
+		verses = append(verses, k)
 	}
-	if err = row.Err(); err != nil {
-		logger.Log.Error().Err(err).Msg("Row iteration error in GetSongsById")
-		return nil, err
-	}
-	logger.Log.Debug().Int("songs_found", len(song)).Msg("Successfully fetched songs by ID")
-	return song, nil
+	logger.Log.Debug().Int("songs_found", len(verses)).Msg("Successfully fetched songs by ID")
+	return verses, nil
 }
 
 func (r *MusicPostgres) CreateSong(song domain.UpdateSong, songDetail domain.UpdateSong) (int, error) {
 	tr, err := r.pg.Begin(context.Background())
 	if err != nil {
-		logger.Log.Error().Err(err).Msg("Failed to begin transaction in CreateSong")
 		return 0, err
 	}
 	var id int
 	*songDetail.Text = strings.ReplaceAll(*songDetail.Text, "'", "''")
-	createListQuery := fmt.Sprintf("INSERT INTO %s (name, artist, releasedate, text, link) VALUES ($1,$2,$3,$4,$5) RETURNING *", songsListTable)
+	createListQuery := fmt.Sprintf("INSERT INTO %s (name, artist, releasedate, text, link) VALUES ($1,$2,$3,$4,$5) RETURNING id", songsListTable)
 	logger.Log.Debug().Str("query", createListQuery).Msg("Executing CreateSong query")
 	row := tr.QueryRow(context.Background(), createListQuery, song.Name, song.Group, songDetail.ReleaseDate, songDetail.Text, songDetail.Link)
 	if err := row.Scan(&id); err != nil {
-		logger.Log.Error().Err(err).Msg("Failed to scan created song ID in CreateSong")
 		tr.Rollback(context.Background())
 		return 0, err
 	}
 	err = tr.Commit(context.Background())
 	if err != nil {
-		logger.Log.Error().Err(err).Msg("Failed to commit transaction in CreateSong")
 		return 0, err
 	}
 	logger.Log.Debug().Int("song_id", id).Msg("Successfully created song")
@@ -138,21 +128,18 @@ func (r *MusicPostgres) GetSongsLibrary(order, sort string, page int, name, grou
 	var songs []domain.Song
 	row, err := r.pg.Query(context.Background(), query, args...)
 	if err != nil {
-		logger.Log.Error().Err(err).Msg("Failed to execute GetSongsLibrary query")
 		return nil, err
 	}
 	defer row.Close()
 	for row.Next() {
 		k := domain.Song{}
-		err := row.Scan(&k.Id, &k.Name, &k.Group, &k.ReleaseDate, &k.Link, &k.Text)
+		err := row.Scan(&k.Name, &k.Group, &k.ReleaseDate, &k.Link, &k.Text)
 		if err != nil {
-			logger.Log.Error().Err(err).Msg("Error scanning row in GetSongsLibrary")
 			return nil, err
 		}
 		songs = append(songs, k)
 	}
 	if err = row.Err(); err != nil {
-		logger.Log.Error().Err(err).Msg("Row iteration error in GetSongsLibrary")
 		return nil, err
 	}
 	logger.Log.Debug().Int("songs_count", len(songs)).Msg("Successfully fetched songs for library")

@@ -22,3 +22,8 @@ type SongDetail struct {
 	Text        string `json:"text" binding:"required"`
 	Link        string `json:"link" binding:"required"`
 }
+
+type Verses struct {
+	Number string
+	Verse  string
+}

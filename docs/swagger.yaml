@@ -1,0 +1,161 @@
+definitions:
+  domain.UpdateSong:
+    properties:
+      date:
+        type: string
+      group:
+        type: string
+      link:
+        type: string
+      name:
+        type: string
+      text:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /api/songs:
+    delete:
+      description: delete song from list by id
+      operationId: delete-list
+      parameters:
+      - description: song delete by id
+        in: query
+        name: id
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: integer
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+        default:
+          description: ""
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Delete song from list
+      tags:
+      - songList
+    get:
+      description: получение списка песен
+      operationId: get-songs
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: integer
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+        default:
+          description: ""
+          schema:
+            type: string
+      summary: Get all songs
+      tags:
+      - songList
+    post:
+      consumes:
+      - application/json
+      description: обновление данных песни
+      operationId: update-list
+      parameters:
+      - description: list info
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/domain.UpdateSong'
+      - description: song update by id
+        in: query
+        name: id
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: integer
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+        default:
+          description: ""
+          schema:
+            type: string
+      summary: Update song
+      tags:
+      - songList
+  /api/songs/song-text:
+    get:
+      description: получение текста песни
+      operationId: find-songtext
+      parameters:
+      - description: text search by id
+        in: query
+        name: name
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: integer
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+        default:
+          description: ""
+          schema:
+            type: string
+      summary: Find song text
+      tags:
+      - songList
+swagger: "2.0"

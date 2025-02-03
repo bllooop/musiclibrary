@@ -49,7 +49,7 @@ func (s *MusicUsecase) CreateSong(song domain.UpdateSong, songDetail domain.Upda
 	return s.repo.CreateSong(song, songDetail)
 }
 
-func (s *MusicUsecase) GetSongsById(songName string, begin, end int) ([]domain.Song, error) {
+func (s *MusicUsecase) GetSongsById(songName string, begin, end int) ([]domain.Verses, error) {
 	return s.repo.GetSongsById(songName, begin, end)
 }
 

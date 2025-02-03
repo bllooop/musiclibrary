@@ -14,7 +14,7 @@ type SongsLibrary interface {
 	DeleteSong(songid int) error
 	Update(songid int, input domain.UpdateSong) error
 	CreateSong(song domain.UpdateSong, songDetail domain.UpdateSong) (int, error)
-	GetSongsById(songName string, begin, end int) ([]domain.Song, error)
+	GetSongsById(songName string, begin, end int) ([]domain.Verses, error)
 }
 
 func NewRepository(pg *pgxpool.Pool) *Repository {
