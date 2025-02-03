@@ -1,7 +1,7 @@
 build:
-		docker compose build selling
+		docker compose build musiclibrary
 run:
-		docker compose up selling
+		docker compose up musiclibrary
 postgrescont:
 		docker run --name=db -e POSTGRES_PASSWORD='54321' -p 5436:5432 -d postgres
 migrate:	

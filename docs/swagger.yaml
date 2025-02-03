@@ -1,5 +1,6 @@
+basePath: /
 definitions:
-  domain.UpdateSong:
+  github_com_bllooop_musiclibrary_internal_domain.UpdateSong:
     properties:
       date:
         type: string
@@ -12,8 +13,12 @@ definitions:
       text:
         type: string
     type: object
+host: localhost:8000
 info:
   contact: {}
+  description: API сервис онлайн библиотека песен
+  title: MusicLibrary API
+  version: "1.0"
 paths:
   /api/songs:
     delete:
@@ -84,6 +89,44 @@ paths:
     post:
       consumes:
       - application/json
+      description: добавление песни в базу данных
+      operationId: create-song
+      parameters:
+      - description: list info
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_bllooop_musiclibrary_internal_domain.UpdateSong'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: integer
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+        default:
+          description: ""
+          schema:
+            type: string
+      summary: Create song
+      tags:
+      - songList
+    put:
+      consumes:
+      - application/json
       description: обновление данных песни
       operationId: update-list
       parameters:
@@ -92,7 +135,7 @@ paths:
         name: input
         required: true
         schema:
-          $ref: '#/definitions/domain.UpdateSong'
+          $ref: '#/definitions/github_com_bllooop_musiclibrary_internal_domain.UpdateSong'
       - description: song update by id
         in: query
         name: id

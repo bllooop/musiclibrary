@@ -1,4 +1,4 @@
-FROM golang:1.20-buster
+FROM golang:1.22
 
 RUN go version
 ENV $GOPATH=/
@@ -12,4 +12,4 @@ RUN go build -o musiclibrary ./cmd/main.go
 
 EXPOSE 8000
 
-CMD ["./movieapi"]
+CMD ["./musiclibrary"]

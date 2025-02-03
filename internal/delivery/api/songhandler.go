@@ -241,7 +241,7 @@ func (h *Handler) deleteSong(c *gin.Context) {
 // @Failure 400,404 {string} message
 // @Failure 500 {string} message
 // @Failure default {string} message
-// @Router /api/songs [post]
+// @Router /api/songs [put]
 func (h *Handler) updateSong(c *gin.Context) {
 	logger.Log.Info().Msg("Received request for updating song / Получен запрос на обновление песни")
 	if c.Request.Method != http.MethodPut {

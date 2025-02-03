@@ -59,7 +59,7 @@ const docTemplate = `{
                     }
                 }
             },
-            "post": {
+            "put": {
                 "description": "обновление данных песни",
                 "consumes": [
                     "application/json"
@@ -79,7 +79,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/domain.UpdateSong"
+                            "$ref": "#/definitions/github_com_bllooop_musiclibrary_internal_domain.UpdateSong"
                         }
                     },
                     {
@@ -87,6 +87,63 @@ const docTemplate = `{
                         "description": "song update by id",
                         "name": "id",
                         "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "добавление песни в базу данных",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "songList"
+                ],
+                "summary": "Create song",
+                "operationId": "create-song",
+                "parameters": [
+                    {
+                        "description": "list info",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_bllooop_musiclibrary_internal_domain.UpdateSong"
+                        }
                     }
                 ],
                 "responses": {
@@ -234,7 +291,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "domain.UpdateSong": {
+        "github_com_bllooop_musiclibrary_internal_domain.UpdateSong": {
             "type": "object",
             "properties": {
                 "date": {
@@ -259,12 +316,12 @@ const docTemplate = `{
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "",
-	Host:             "",
-	BasePath:         "",
+	Version:          "1.0",
+	Host:             "localhost:8000",
+	BasePath:         "/",
 	Schemes:          []string{},
-	Title:            "",
-	Description:      "",
+	Title:            "MusicLibrary API",
+	Description:      "API сервис онлайн библиотека песен",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

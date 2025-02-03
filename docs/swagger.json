@@ -1,8 +1,13 @@
 {
     "swagger": "2.0",
     "info": {
-        "contact": {}
+        "description": "API сервис онлайн библиотека песен",
+        "title": "MusicLibrary API",
+        "contact": {},
+        "version": "1.0"
     },
+    "host": "localhost:8000",
+    "basePath": "/",
     "paths": {
         "/api/songs": {
             "get": {
@@ -48,7 +53,7 @@
                     }
                 }
             },
-            "post": {
+            "put": {
                 "description": "обновление данных песни",
                 "consumes": [
                     "application/json"
@@ -68,7 +73,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/domain.UpdateSong"
+                            "$ref": "#/definitions/github_com_bllooop_musiclibrary_internal_domain.UpdateSong"
                         }
                     },
                     {
@@ -76,6 +81,63 @@
                         "description": "song update by id",
                         "name": "id",
                         "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "добавление песни в базу данных",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "songList"
+                ],
+                "summary": "Create song",
+                "operationId": "create-song",
+                "parameters": [
+                    {
+                        "description": "list info",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_bllooop_musiclibrary_internal_domain.UpdateSong"
+                        }
                     }
                 ],
                 "responses": {
@@ -223,7 +285,7 @@
         }
     },
     "definitions": {
-        "domain.UpdateSong": {
+        "github_com_bllooop_musiclibrary_internal_domain.UpdateSong": {
             "type": "object",
             "properties": {
                 "date": {

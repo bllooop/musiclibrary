@@ -1,6 +1,7 @@
 package api
 
 import (
+	_ "github.com/bllooop/musiclibrary/docs"
 	"github.com/bllooop/musiclibrary/internal/usecase"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
