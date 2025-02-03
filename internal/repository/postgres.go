@@ -18,7 +18,6 @@ type Config struct {
 }
 
 const (
-	userListTable  = "userlist"
 	songsListTable = "songlist"
 )
 

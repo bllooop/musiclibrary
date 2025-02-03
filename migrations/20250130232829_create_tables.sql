@@ -1,12 +1,5 @@
 -- +goose Up
 -- +goose StatementBegin
-CREATE TABLE userlist
-(
-    id serial not null unique,
-    username varchar(255) not null unique,
-    password varchar(255) not null
-);
-
 CREATE TABLE songlist
 (
     id serial not null unique,
@@ -20,7 +13,5 @@ CREATE TABLE songlist
 
 -- +goose Down
 -- +goose StatementBegin
-DROP TABLE userlist;
-
 DROP TABLE songlist;
 -- +goose StatementEnd
