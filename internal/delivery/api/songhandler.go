@@ -30,14 +30,14 @@ type getSongsResponse struct {
 // @Failure default {string} message
 // @Router /api/songs/song-text [get]
 func (h *Handler) getSongById(c *gin.Context) {
-	logger.Log.Info().Msg("Received request for getting song text")
+	logger.Log.Info().Msg("Received request for getting song text / Получен запрос на получение текста песни")
 	if c.Request.Method != http.MethodGet {
-		newErrorResponse(c, http.StatusBadRequest, "GET request required")
+		newErrorResponse(c, http.StatusBadRequest, "Требуется запрос GET")
 		return
 	}
 	songName := c.Query("name")
 	if songName == "" {
-		newErrorResponse(c, http.StatusBadRequest, "name can't be empty")
+		newErrorResponse(c, http.StatusBadRequest, "name can't be empty / имя не может быть пустым")
 		return
 	}
 
@@ -59,7 +59,7 @@ func (h *Handler) getSongById(c *gin.Context) {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
-	logger.Log.Info().Msg("Received response for getting song text")
+	logger.Log.Info().Msg("Received response for getting song text / Получен ответ для получения текста песни")
 
 	c.JSON(http.StatusOK, gin.H{
 		"song_name": songName,
@@ -79,9 +79,9 @@ func (h *Handler) getSongById(c *gin.Context) {
 // @Failure default {string} message
 // @Router /api/songs [get]
 func (h *Handler) getSongs(c *gin.Context) {
-	logger.Log.Info().Msg("Received request for get songs")
+	logger.Log.Info().Msg("Received request for get songs / Получили запрос на получение песен")
 	if c.Request.Method != http.MethodGet {
-		newErrorResponse(c, http.StatusBadRequest, "GET request required")
+		newErrorResponse(c, http.StatusBadRequest, "GET request required / Требуется запрос GET")
 		return
 	}
 	sort := c.DefaultQuery("sort", "artist")
@@ -106,7 +106,7 @@ func (h *Handler) getSongs(c *gin.Context) {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
-	logger.Log.Info().Msg("Received response for get songs")
+	logger.Log.Info().Msg("Received response for get songs / Получен ответ на получение песен")
 
 	c.JSON(http.StatusOK, getSongsResponse{
 		Data: lists,
@@ -126,9 +126,9 @@ func (h *Handler) getSongs(c *gin.Context) {
 // @Failure default {string} message
 // @Router /api/songs [post]
 func (h *Handler) createSong(c *gin.Context) {
-	logger.Log.Info().Msg("Received request for create song")
+	logger.Log.Info().Msg("Received request for create song / Получен запрос на создание песни")
 	if c.Request.Method != http.MethodPost {
-		newErrorResponse(c, http.StatusBadRequest, "POST request required")
+		newErrorResponse(c, http.StatusBadRequest, "POST request required / Требуется запрос POST")
 		return
 	}
 	var input domain.UpdateSong
@@ -137,7 +137,7 @@ func (h *Handler) createSong(c *gin.Context) {
 		return
 	}
 	if input.Group == nil || input.Name == nil {
-		newErrorResponse(c, http.StatusBadRequest, "empty fields for adding a song")
+		newErrorResponse(c, http.StatusBadRequest, "empty fields for adding a song / поля для добавления песни пустые")
 		return
 	}
 	group := ""
@@ -152,41 +152,41 @@ func (h *Handler) createSong(c *gin.Context) {
 	url := fmt.Sprintf("https://api.example.com/info?group=%s&song=%s", url.QueryEscape(group), url.QueryEscape(name))
 	resp, err := http.Get(url)
 	if err != nil {
-		newErrorResponse(c, http.StatusInternalServerError, "error when making external get request")
+		newErrorResponse(c, http.StatusInternalServerError, "error when making external get request / ошибка при выполнении внешнего запроса на получение")
 		return
 	}
 	if resp.StatusCode != http.StatusOK {
-		newErrorResponse(c, resp.StatusCode, "error: received non-200 status code")
+		newErrorResponse(c, resp.StatusCode, "error: received non-200 status code / ошибка: получен код состояния не-200")
 		return
 	}
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		newErrorResponse(c, http.StatusInternalServerError, "error reading response body")
+		newErrorResponse(c, http.StatusInternalServerError, "error reading response body / ошибка чтения тела ответа")
 		return
 	}
 	if len(body) == 0 {
-		newErrorResponse(c, http.StatusInternalServerError, "error: empty response body")
+		newErrorResponse(c, http.StatusInternalServerError, "error: empty response body / ошибка: пустое тело ответа")
 		return
 	}
-	logger.Log.Debug().Str("response_body", string(body)).Msg("Successfully read response body")
+	logger.Log.Debug().Str("response_body", string(body)).Msg("Successfully read response body / Успешно прочитано тело ответа")
 
 	var song domain.UpdateSong
 	err = json.Unmarshal(body, &song)
 	if err != nil {
-		newErrorResponse(c, http.StatusInternalServerError, "error unmarshaling JSON")
+		newErrorResponse(c, http.StatusInternalServerError, "error unmarshaling JSON / ошибка при обработке JSON")
 		return
 	}
 	logger.Log.Debug().
 		Interface("parsed_song", song).
-		Msg("Successfully unmarshaled JSON into UpdateSong struct")
+		Msg("Successfully unmarshaled JSON into UpdateSong struct / Успешно обработали JSON в структуре UpdateSong")
 	id, err := h.usecases.CreateSong(input, song)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
-	logger.Log.Info().Msg("Received response for creating song")
+	logger.Log.Info().Msg("Received response for creating song / Получен ответ на создание песни")
 
 	c.JSON(http.StatusOK, map[string]interface{}{
 		"id": id,
@@ -206,23 +206,23 @@ func (h *Handler) createSong(c *gin.Context) {
 // @Failure default {string} message
 // @Router /api/songs [delete]
 func (h *Handler) deleteSong(c *gin.Context) {
-	logger.Log.Info().Msg("Received request for delete song")
+	logger.Log.Info().Msg("Received request for delete song / Получен запрос на удаление песни")
 	if c.Request.Method != http.MethodDelete {
-		newErrorResponse(c, http.StatusBadRequest, "DELETE request required")
+		newErrorResponse(c, http.StatusBadRequest, "DELETE request required / Требуется запрос DELETE")
 		return
 	}
 	songid, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		newErrorResponse(c, http.StatusBadRequest, "invalid id value")
+		newErrorResponse(c, http.StatusBadRequest, "invalid id value / недопустимое значение идентификатора")
 		return
 	}
-	logger.Log.Debug().Int("id parameter", songid).Msg("Successfully read song id")
+	logger.Log.Debug().Int("id parameter", songid).Msg("Successfully read song id / Успешно прочитан идентификатор песни")
 	err = h.usecases.DeleteSong(songid)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
-	logger.Log.Info().Msg("Received response for deleting song")
+	logger.Log.Info().Msg("Received response for deleting song / Получен ответ на удаление песни")
 
 	c.JSON(http.StatusOK, statusResponse{
 		Status: "ok",
@@ -243,17 +243,17 @@ func (h *Handler) deleteSong(c *gin.Context) {
 // @Failure default {string} message
 // @Router /api/songs [post]
 func (h *Handler) updateSong(c *gin.Context) {
-	logger.Log.Info().Msg("Received request for updating song")
+	logger.Log.Info().Msg("Received request for updating song / Получен запрос на обновление песни")
 	if c.Request.Method != http.MethodPut {
-		newErrorResponse(c, http.StatusBadRequest, "PUT request required")
+		newErrorResponse(c, http.StatusBadRequest, "PUT request required / Требуется запрос PUT")
 		return
 	}
 	songid, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		newErrorResponse(c, http.StatusBadRequest, "invalid id value")
+		newErrorResponse(c, http.StatusBadRequest, "invalid id value / недопустимое значение идентификатора")
 		return
 	}
-	logger.Log.Debug().Int("id parameter", songid).Msg("Successfully read song id")
+	logger.Log.Debug().Int("id parameter", songid).Msg("Successfully read song id / Успешно прочитан идентификатор песни")
 
 	var input domain.UpdateSong
 	if err := c.BindJSON(&input); err != nil {
@@ -262,13 +262,13 @@ func (h *Handler) updateSong(c *gin.Context) {
 	}
 	logger.Log.Debug().
 		Interface("binded_song", input).
-		Msg("Successfully binded JSON input to struct")
+		Msg("Successfully binded JSON input to struct / Успешное обработка JSON со структурой")
 
 	if err := h.usecases.Update(songid, input); err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
-	logger.Log.Info().Msg("Received response for updating song")
+	logger.Log.Info().Msg("Received response for updating song / Получен ответ на обновление песни")
 
 	c.JSON(http.StatusOK, statusResponse{
 		Status: "ok",

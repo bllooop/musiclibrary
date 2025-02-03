@@ -43,8 +43,8 @@ FROM split_text
 WHERE verse_number BETWEEN $2 AND $3
 ORDER BY verse_number;`, songsListTable)
 	logger.Log.Debug().Str("query", query).Str("song_name", songName).
-		Int("begin", begin).Int("end", end).Msg("Fetching song verses")
-	logger.Log.Info().Msg("Executing query for get songs")
+		Int("begin", begin).Int("end", end).Msg("Fetching song verses / Получение куплетов песни")
+	logger.Log.Info().Msg("Executing query for get songs / Выполнение запроса на получение песен")
 	rows, err := r.pg.Query(context.Background(), query, "%"+songName+"%", begin, end)
 	if err != nil {
 		return nil, err
@@ -53,12 +53,12 @@ ORDER BY verse_number;`, songsListTable)
 	for rows.Next() {
 		var k domain.Verses
 		if err := rows.Scan(&k.Number, &k.Verse); err != nil {
-			logger.Log.Error().Err(err).Msg("Error scanning row")
+			logger.Log.Error().Err(err).Msg("Error scanning row / Ошибка сканирования строки")
 			return nil, err
 		}
 		verses = append(verses, k)
 	}
-	logger.Log.Debug().Int("songs_found", len(verses)).Msg("Successfully fetched songs by ID")
+	logger.Log.Debug().Int("songs_found", len(verses)).Msg("Successfully fetched songs by ID / Успешно найдены песни по идентификатору")
 	return verses, nil
 }
 
@@ -70,7 +70,7 @@ func (r *MusicPostgres) CreateSong(song domain.UpdateSong, songDetail domain.Upd
 	var id int
 	*songDetail.Text = strings.ReplaceAll(*songDetail.Text, "'", "''")
 	createListQuery := fmt.Sprintf("INSERT INTO %s (name, artist, releasedate, text, link) VALUES ($1,$2,$3,$4,$5) RETURNING id", songsListTable)
-	logger.Log.Debug().Str("query", createListQuery).Msg("Executing CreateSong query")
+	logger.Log.Debug().Str("query", createListQuery).Msg("Executing CreateSong query / Выполнение запроса CreateSong")
 	row := tr.QueryRow(context.Background(), createListQuery, song.Name, song.Group, songDetail.ReleaseDate, songDetail.Text, songDetail.Link)
 	if err := row.Scan(&id); err != nil {
 		tr.Rollback(context.Background())
@@ -80,7 +80,7 @@ func (r *MusicPostgres) CreateSong(song domain.UpdateSong, songDetail domain.Upd
 	if err != nil {
 		return 0, err
 	}
-	logger.Log.Debug().Int("song_id", id).Msg("Successfully created song")
+	logger.Log.Debug().Int("song_id", id).Msg("Successfully created song / Успешно сохраненная песня")
 	return id, nil
 }
 func (r *MusicPostgres) GetSongsLibrary(order, sort string, page int, name, group, text, releasedate, link string) (map[string]interface{}, error) {
@@ -142,7 +142,7 @@ func (r *MusicPostgres) GetSongsLibrary(order, sort string, page int, name, grou
 	if err = row.Err(); err != nil {
 		return nil, err
 	}
-	logger.Log.Debug().Int("songs_count", len(songs)).Msg("Successfully fetched songs for library")
+	logger.Log.Debug().Int("songs_count", len(songs)).Msg("Successfully fetched songs from library / Успешно получены песни из библиотеки")
 	data["Songs"] = songs
 	return data, nil
 }

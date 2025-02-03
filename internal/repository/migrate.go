@@ -18,7 +18,7 @@ func RunMigrate(cfg Config, migratePath string) error {
 		return err
 	}
 	defer db.Close()
-	logger.Log.Info().Msg("Applying migrations")
+	logger.Log.Info().Msg("Applying migrations / Применение миграций")
 	err = goose.SetDialect("postgres")
 	if err != nil {
 		return err
@@ -27,6 +27,6 @@ func RunMigrate(cfg Config, migratePath string) error {
 	if err != nil {
 		return err
 	}
-	logger.Log.Info().Msg("Migrations applied successfully!")
+	logger.Log.Info().Msg("Migrations applied successfully! / Миграция прошла успешно!")
 	return nil
 }
